@@ -6,6 +6,7 @@ namespace QuizManager.Data
   public class QuizService
   {
     private static readonly List<QuizItem> Quiz;
+
     static QuizService()
     {
       Quiz = new List<QuizItem> {

@@ -24,7 +24,7 @@ else
           @foreach (var choice in quizItem.Choices)
           {
               int currentQuizIndex = quizIndex;
-              <input class="form-check-input" type="radio" name="@quizIndex" value="@choiceIndex" @onchange="@((eventArgs) => UpdateScore(Convert.ToInt32(eventArgs.Value), currentQuizIndex))"/>@choice<br>
+              <input class="form-check-input" type="radio" name="@quizIndex" value="@choiceIndex" @onchange="@((eventArgs) => UpdateScore(Convert.ToInt32(eventArgs.Value), currentQuizIndex))" />@choice<br>
 
               choiceIndex++;
           }
@@ -34,7 +34,6 @@ else
       quizIndex++;
   }
       }
-
 
 @code{
   List<QuizItem> quiz;
