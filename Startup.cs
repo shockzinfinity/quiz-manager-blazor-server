@@ -1,9 +1,13 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QuizManager.Data;
+using System;
 
 namespace QuizManager
 {
@@ -22,6 +26,51 @@ namespace QuizManager
     {
       services.AddRazorPages();
       services.AddServerSideBlazor();
+
+      // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+      services.Configure<CookiePolicyOptions>(options =>
+      {
+        options.CheckConsentNeeded = context => true;
+        options.MinimumSameSitePolicy = SameSiteMode.None;
+      });
+
+      // add authentication service
+      services.AddAuthentication(options =>
+      {
+        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+      }).AddCookie()
+      .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+      {
+        options.Authority = "https://auth.shockz.io";
+        options.ClientId = "movies_blazor_client";
+        options.ClientSecret = "secret";
+
+        options.ResponseType = "code";
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+        options.Scope.Add("address");
+        options.Scope.Add("email");
+        options.Scope.Add("movieAPI");
+        options.Scope.Add("roles");
+
+        options.CallbackPath = new PathString("/callback");
+
+        options.ClaimActions.MapUniqueJsonKey("role", "role");
+
+        options.SaveTokens = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+          NameClaimType = JwtClaimTypes.GivenName,
+          RoleClaimType = JwtClaimTypes.Role
+        };
+      });
+
+      services.AddHttpContextAccessor();
       services.AddSingleton<WeatherForecastService>();
       services.AddSingleton<QuizService>();
     }
